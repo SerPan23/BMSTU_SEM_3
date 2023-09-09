@@ -4,11 +4,28 @@ int normalize_zeros(bignum_t *a)
 {
     ptrdiff_t start_ind = a->mantissa_len - 1;
     for (ptrdiff_t i = start_ind; i >= 0; i--)
+    {
         if (a->mantissa[i] == 0)
         {
             a->mantissa_len--;
             a->exponet--;
         }
+        else
+            break;
+    }
+    size_t count = 0;
+    int is_not_0 = 0;
+    for (size_t i = 0; i < a->mantissa_len; i++)
+    {
+        if (a->mantissa[i] == 0 && !is_not_0)
+            count++;
+        else
+        {
+            is_not_0 = 1;
+            a->mantissa[i - count] = a->mantissa[i];
+        }
+    }
+    a->mantissa_len -= count;
     return EXIT_SUCCESS;
 }
 
@@ -51,15 +68,11 @@ int find_exponet(char str[], size_t len, int32_t *exponet, ptrdiff_t *e_ind)
         *e_ind = p - str;
         ptrdiff_t pt = *e_ind;
 
-        int is_sign = 0;
         if (str[*e_ind + 1] == '-' || str[*e_ind + 1] == '+')
-            is_sign = 1;
-        
-        if ((len - 1 - (*e_ind) > 5) || (is_sign && (len - 1 - (*e_ind) > 6)))
-            return ERROR_EXPONET_SIZE;
-        
-        if (is_sign)
             pt++;
+        
+        if (len - 1 - (pt) > 5)
+            return ERROR_EXPONET_SIZE;
 
         int tmp = 0;
         for (size_t i = pt + 1; i < len; i++)
@@ -125,6 +138,9 @@ int str_to_bignum(char s[], size_t len, bignum_t *a)
     if (rc != EXIT_SUCCESS)
         return rc;
 
+    if (dot_ind < no_0_ind)
+        no_0_ind = dot_ind;
+
     int is_start_num = 0;
 
     for (ptrdiff_t i = e_ind - 1; i >= 0; i--)
@@ -174,32 +190,78 @@ int bignum_to_str(char s[], size_t *len, bignum_t *a)
 {
     char tmp[MAX_STR_LEN + 1];
     int offset = 0;
-    if (a->is_negative)
+    if (a->mantissa_len == 0)
     {
-        tmp[0] = '-';
-        tmp[1] = '0';
-        tmp[2] = '.';
-        offset = 3;
+        tmp[0] = '0';
+        offset = 1;
     }
     else
     {
-        tmp[0] = '0';
-        tmp[1] = '.';
-        offset = 2;
+        if (a->is_negative)
+        {
+            tmp[0] = '-';
+            tmp[1] = '0';
+            tmp[2] = '.';
+            offset = 3;
+        }
+        else
+        {
+            tmp[0] = '0';
+            tmp[1] = '.';
+            offset = 2;
+        }
+        for (ptrdiff_t i = a->mantissa_len - 1; i >= 0; i--)
+            offset += snprintf(tmp + offset, MAX_STR_LEN + 1 - offset, "%d", a->mantissa[i]);
     }
-    for (ptrdiff_t i = a->mantissa_len - 1; i >= 0; i--)
-        offset += snprintf(tmp + offset, MAX_STR_LEN + 1 - offset, "%d", a->mantissa[i]);
-
     snprintf(tmp + offset, MAX_STR_LEN + 1 - offset, "E%d", a->exponet);
     strcpy(s, tmp);
     *len = strlen(s);
     return EXIT_SUCCESS;
 }
 
+int rounding(int tmp_mant[], size_t *len)
+{
+
+    int t = 0, tmp = 0;;
+    for (size_t i = 0; i < *len; i++)
+    {
+        tmp = tmp_mant[i];
+        // printf("%zu/%zu) %d | %d + %d | %d\n", i, *len, tmp, tmp % 10, t, tmp / 10);
+        tmp_mant[i] = tmp % 10 + t;
+        t = tmp / 10;
+        if (tmp_mant[i] > 9)
+        {
+            tmp = tmp_mant[i];
+            tmp_mant[i] = tmp % 10;
+            t = tmp / 10;
+        }
+
+    }
+
+    // printf("# %d | %d | %d\n", tmp_mant[*len - 1], tmp_mant[*len], t);
+
+    if (tmp_mant[*len] > 9)
+    {
+        tmp_mant[*len] = tmp_mant[*len] % 10;
+        tmp_mant[*len + 1] = 1;
+        ++(*len);
+    }
+
+    return EXIT_SUCCESS;
+}
+
 int bignum_mul(bignum_t *a, bignum_t *b, bignum_t *result)
 {
-    int tmp[MAX_MANTISSA_LEN + 1];
-    for (size_t i = 0; i < MAX_MANTISSA_LEN + 1; i++)
+    if (a->mantissa_len == 0 || b->mantissa_len == 0 )
+    {
+        result->exponet = 0;
+        result->is_negative = 0;
+        result->mantissa_len = 0;
+        return EXIT_SUCCESS;
+    }
+
+    int tmp[2 * MAX_MANTISSA_LEN + 1];
+    for (size_t i = 0; i < 2 *  MAX_MANTISSA_LEN + 1; i++)
         tmp[i] = 0;
 
     result->exponet = a->exponet + b->exponet;
@@ -208,15 +270,64 @@ int bignum_mul(bignum_t *a, bignum_t *b, bignum_t *result)
     size_t i, j;
     for (i = 0; i < b->mantissa_len; i++)
         for (j = 0; j < a->mantissa_len; j++)
-            tmp[j + i] += a->mantissa[j] * b->mantissa[i];
-    int t = 0;
-    size_t k;
-    result->mantissa_len = i + j;
-    for (k = 0; k < result->mantissa_len - 1; k++)
+        {
+            int t = a->mantissa[j] * b->mantissa[i];
+            tmp[j + i] += t % 10;
+            tmp[j + i + 1] += t / 10;
+            int t2 = tmp[j + i];
+            tmp[j + i] = t2 % 10;
+            tmp[j + i + 1] += t2 / 10;
+        }
+    // int t = 0;
+    // size_t k;
+    // result->mantissa_len = i + j;
+    // for (k = 0; k < result->mantissa_len - 1; k++)
+    // {
+    //     result->mantissa[k] = tmp[k] % 10 + t;
+    //     t = tmp[k] / 10;
+    // }
+    // result->mantissa[k + 1] = t;
+
+    size_t len = i + j;
+    // for (size_t k = 0; k < len; k++)
+    //     printf("%d ", tmp[k]);
+    // printf("\n\n");
+    int rc = rounding(tmp, &len);
+    if (rc != EXIT_SUCCESS)
+        return rc;
+
+    size_t start_ind = 0;
+    if (len > MAX_MANTISSA_LEN)
+        start_ind = len - MAX_MANTISSA_LEN;
+
+    // for (size_t k = 0; k < len; k++)
+    //     printf("%d ", tmp[k]);
+    // printf("\n\n");
+    for (size_t k = 0; k < start_ind; k++)
     {
-        result->mantissa[k] = tmp[k] % 10 + t;
-        t = tmp[k] / 10;
+        if (tmp[k] >= 5)
+            tmp[k + 1] += 1;
+        tmp[k] = 0;
     }
-    result->mantissa[k + 1] = t;
+    // for (size_t k = 0; k < len; k++)
+    //     printf("%d ", tmp[k]);
+    // printf("\n\n");
+    rc = rounding(tmp, &len);
+    if (rc != EXIT_SUCCESS)
+        return rc;
+    // printf("----\n");
+    // for (size_t k = 0; k < len; k++)
+    //     printf("%d ", tmp[k]);
+    // printf("\n\n");
+
+    result->mantissa_len = 0;
+    for (size_t k = start_ind; k < len; k++)
+    {
+        // printf("* %zu | %d | %zu\n", k, tmp[k], result->mantissa_len);
+        result->mantissa[result->mantissa_len++] = tmp[k];
+    }
+    rc = normalize_zeros(result);
+    if (rc != EXIT_SUCCESS)
+        return rc;
     return EXIT_SUCCESS;
 }

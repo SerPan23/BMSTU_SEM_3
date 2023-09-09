@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stddef.h>
+#include <math.h>
 
 #define ERROR_MANTISSA_LEN 1
 #define ERROR_EXPONET_SIZE 2
