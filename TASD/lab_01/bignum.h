@@ -25,12 +25,19 @@ typedef struct
     int32_t exponet;
 } bignum_t;
 
+// convert string to bignum
 int str_to_bignum(char s[], size_t len, bignum_t *a);
+
+// convert bignum to string
 int bignum_to_str(char s[], size_t *len, bignum_t *a);
 
+// printing bignum in console
 int bignum_print(bignum_t *a);
+
+// scan bignum from console
 int bignum_scan(bignum_t *a);
 
+// multiple two bignums
 int bignum_mul(bignum_t *a, bignum_t *b, bignum_t *result);
 
 #endif
