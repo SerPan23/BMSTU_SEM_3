@@ -11,6 +11,7 @@
 #include <sys/time.h>
 
 #define MAX_STR_LEN 30
+#define MAX_CELL_LINE "──────────────────────────────"
 #define MAX_ROW_COUNT 10000
 
 // useful_funcs

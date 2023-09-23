@@ -1,6 +1,6 @@
 #include "menu.h"
 
-#define MENU_ITEMS_COUNT 11
+#define MENU_ITEMS_COUNT 12
 
 void print_menu(void)
 {
@@ -21,6 +21,7 @@ void print_menu(void)
     9) Print table by sorted keys table\n\
     10) Print results of comparing efficiency by work with keys table and table\n\
     11) Print results of using various sorting algorithms\n\
+    12) Update data in file\n\
     0) Quit programm\n");
     printf("------------------\n");
 }
@@ -251,6 +252,15 @@ void menu(table_t *table)
                 printf("│%30s│%15llu│%15zu│\n", "work table by sort keys", time5 + time4, (sizeof(keys_table_t) + sizeof(country_t)) * table->rows_count);
                 printf("%s", footer);
             }
+            else if (command == 12)
+            {
+                FILE *file = fopen(file_path, "w");
+                for (size_t i = 0; i < table->rows_count; i++)
+                    print_country(&table->countries[i], file);
+                fclose(file);
+                printf("FILE UPDATED!\n");
+            }
+
         }
         else
             printf("ERROR: you need read file before doing something!\n");

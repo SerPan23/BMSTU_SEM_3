@@ -235,67 +235,95 @@ int read_country(country_t *country, FILE *input)
     return EXIT_SUCCESS;
 }
 
+char *get_obj_main_type_str(obj_main_type_enum type)
+{
+    switch (type)
+    {
+    case NATURE:
+        return "nature";
+        break;
+    case HISTORY:
+        return "history";
+        break;
+    case ART:
+        return "art";
+        break;
+    }
+    return "-";
+}
+
 //PRINT
 void print_excursion(excursion_t *excursion, FILE *output)
 {
-    fprintf(output, "Objects count: %d\n", excursion->obj_count);
+    if (output == stdout)
+        fprintf(output, "Objects count: ");
+    fprintf(output, "%d\n", excursion->obj_count);
 
-    fprintf(output, "Objects main type: ");
-    switch (excursion->obj_main_type)
+    if (output == stdout)
+        fprintf(output, "Objects main type: ");
+    fprintf(output, "%s\n", get_obj_main_type_str(excursion->obj_main_type));
+}
+
+char *get_season_str(main_season_enum type)
+{
+    switch (type)
     {
-    case NATURE:
-        fprintf(output, "nature\n");
+    case WINTER:
+        return "winter";
         break;
-    case HISTORY:
-        fprintf(output, "history\n");
+    case SPRING:
+        return "spring";
         break;
-    case ART:
-        fprintf(output, "art\n");
+    case SUMMER:
+        return "summer";
+        break;
+    case AUTUMN:
+        return "autumn";
         break;
     }
+    return "-";
 }
 
 void print_beach(beach_t *beach, FILE *output)
 {
-    fprintf(output, "Main season: ");
-    switch (beach->main_season)
+    if (output == stdout)
+        fprintf(output, "Main season: ");
+    fprintf(output, "%s\n", get_season_str(beach->main_season));
+    
+    if (output == stdout)
+        fprintf(output, "Air temp: ");
+    fprintf(output, "%.2lf\n", beach->air_temp);
+
+    if (output == stdout)
+        fprintf(output, "Water temp: ", beach->water_temp);
+    fprintf(output, "%.2lf\n", beach->water_temp);
+}
+
+char *get_sports_str(sports_enum type)
+{
+    switch (type)
     {
-    case WINTER:
-        fprintf(output, "winter\n");
+    case DOWNHILL_SKIING:
+        return "downhill skiing";
         break;
-    case SPRING:
-        fprintf(output, "spring\n");
+    case SURFING:
+        return "surfing";
         break;
-    case SUMMER:
-        fprintf(output, "summer\n");
+    case CLIMBING:
+        return "climbing";
         break;
-    case AUTUMN:
-        fprintf(output, "autumn\n");
+    case RAFTING:
+        return "rafting";
         break;
     }
-
-    fprintf(output, "Air temp: %.6lf\n", beach->air_temp);
-    fprintf(output, "Water temp: %.6lf\n", beach->water_temp);
+    return "-";
 }
 
 void print_sports(sports_enum *sport_type, FILE *output)
 {
-    fprintf(output, "Sport type: ");
-    switch (*sport_type)
-    {
-    case DOWNHILL_SKIING:
-        fprintf(output, "downhill skiing\n");
-        break;
-    case SURFING:
-        fprintf(output, "surfing\n");
-        break;
-    case CLIMBING:
-        fprintf(output, "climbing\n");
-        break;
-    case RAFTING:
-        fprintf(output, "rafting\n");
-        break;
-    }
+    if (output == stdout)
+        fprintf(output, "Sport type: ");
+    fprintf(output, "%s\n", get_sports_str(*sport_type));
 }
 
 char *get_str_continent(int continent)
@@ -321,30 +349,52 @@ char *get_str_continent(int continent)
         return "Antarctica";
         break;
     }
-    return "";
+    return "-";
 }
 
 void print_country(country_t *country, FILE *output)
 {
-    fprintf(output, "Name: %s\n", country->name);
-    fprintf(output, "Capital: %s\n", country->capital);
-    fprintf(output, "Continent: %s\n", get_str_continent(country->continent));
-    fprintf(output, "Need visa: %s\n", country->is_need_visa? "Yes": "No");
-    fprintf(output, "Flight time: %d:%d\n", country->flight_time.hours, country->flight_time.minute);
-    fprintf(output, "Min cost: %d\n", country->min_rest_cost);
-    fprintf(output, "Tourism type: ");
+    if (output == stdout)
+        fprintf(output, "Name: ");
+    fprintf(output, "%s\n", country->name);
+
+    if (output == stdout)
+        fprintf(output, "Capital: ");
+    fprintf(output, "%s\n", country->capital);
+
+    if (output == stdout)
+        fprintf(output, "Continent: ");
+    fprintf(output, "%s\n", get_str_continent(country->continent));
+
+    if (output == stdout)
+        fprintf(output, "Need visa: ");
+    fprintf(output, "%s\n", country->is_need_visa ? "Yes" : "No");
+
+    if (output == stdout)
+        fprintf(output, "Flight time: ");
+    fprintf(output, "%d:%d\n", country->flight_time.hours, country->flight_time.minute);
+
+    if (output == stdout)
+        fprintf(output, "Min cost: ");
+    fprintf(output, "%d\n", country->min_rest_cost);
+
+    if (output == stdout)
+        fprintf(output, "Tourism type: ");
     switch (country->tourism_type)
     {
     case EXCURSION:
-        fprintf(output, "excursion\n");
+        if (output == stdout)
+            fprintf(output, "excursion\n");
         print_excursion(&country->tourism.excursion, output);
         break;
     case BEACH:
-        fprintf(output, "beach\n");
+        if (output == stdout)
+            fprintf(output, "beach\n");
         print_beach(&country->tourism.beach, output);
         break;
     case SPORTS:
-        fprintf(output, "sports\n");
+        if (output == stdout)
+            fprintf(output, "sports\n");
         print_sports(&country->tourism.sport_type, output);
         break;
     }

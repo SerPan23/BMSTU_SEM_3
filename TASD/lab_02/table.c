@@ -88,20 +88,135 @@ int del_row_by_id(table_t *table, size_t id)
     return EXIT_SUCCESS;
 }
 
+void print_header(FILE *f)
+{
+    // %4zu %*s %*s %*s %4s %2d:%2d %*d %10d %10s %10s %5.2lf %5.2lf %15s
+    fprintf(f, "┌%s┬%s┬%s┬%s┬%s┬%s┬%s┬%s┬%s┬%s┬%s┬%s┬%s┬%s┐\n",
+            "────",
+            MAX_CELL_LINE,
+            MAX_CELL_LINE,
+            MAX_CELL_LINE,
+            "────",
+            "───────────────",
+            MAX_CELL_LINE,
+            "──────────",
+            "──────────",
+            "──────────",
+            "──────────",
+            "──────────",
+            "───────────",
+            "───────────────");
+    //TODO: make header
+    // fprintf(f, "│%4s│%4s│%*s│\n", "ID", "TABLE ID", MAX_STR_LEN, "Min rest cost");
+    fprintf(f, "│%4s│%*s│%*s│%*s│%4s│%15s│%*s│%10s│%10s│%10s│%10s│%10s│%11s│%15s│\n",
+            "ID",
+            MAX_STR_LEN, "Name",
+            MAX_STR_LEN, "Capital",
+            MAX_STR_LEN, "Continent",
+            "Visa",
+            "Flight time",
+            MAX_STR_LEN, "Min cost",
+            "Tour type",
+            "Obj count",
+            "Objs type",
+            "Season",
+            "Air temp",
+            "Water temp",
+            "Sport type");
+    // fprintf(f, "├%s┼%s┼%s┤\n")
+    fprintf(f, "├%s┼%s┼%s┼%s┼%s┼%s┼%s┼%s┼%s┼%s┼%s┼%s┼%s┼%s┤\n",
+            "────",
+            MAX_CELL_LINE,
+            MAX_CELL_LINE,
+            MAX_CELL_LINE,
+            "────",
+            "───────────────",
+            MAX_CELL_LINE,
+            "──────────",
+            "──────────",
+            "──────────",
+            "──────────",
+            "──────────",
+            "───────────",
+            "───────────────");
+}
+void print_footer(FILE *f)
+{
+    // %4zu %*s %*s %*s %4s %2d:%2d %*d %10s %10d %10s %10s %5.2lf %5.2lf %15s
+    fprintf(f, "└%s┴%s┴%s┴%s┴%s┴%s┴%s┴%s┴%s┴%s┴%s┴%s┴%s┴%s┘\n",
+            "────",
+            MAX_CELL_LINE,
+            MAX_CELL_LINE,
+            MAX_CELL_LINE,
+            "────",
+            "───────────────",
+            MAX_CELL_LINE,
+            "──────────",
+            "──────────",
+            "──────────",
+            "──────────",
+            "──────────",
+            "───────────",
+            "───────────────");
+}
+
+void print_row(size_t id, country_t *row)
+{
+    printf("│%4zu│%*s│%*s│%*s│%4s│%12d:%2d│%*d│", id,
+           MAX_STR_LEN, row->name,
+           MAX_STR_LEN, row->capital,
+           MAX_STR_LEN, get_str_continent(row->continent),
+           row->is_need_visa ? "Yes" : "No",
+           row->flight_time.hours, row->flight_time.minute,
+           MAX_STR_LEN, row->min_rest_cost);
+    // printf("%10d %10s %10s %5.2lf %5.2lf %15s");
+    switch (row->tourism_type)
+    {
+    case EXCURSION:
+        printf("%10s│", "excursion");
+        printf("%10d│%10s│%10s│%10s│%11s│%15s",
+               row->tourism.excursion.obj_count,
+               get_obj_main_type_str(row->tourism.excursion.obj_main_type),
+               "-", "-", "-", "-");
+        break;
+    case BEACH:
+        printf("%10s│", "beach");
+        printf("%10s│%10s│%10s│%10.2lf│%11.2lf│%15s",
+               "-", "-",
+               get_season_str(row->tourism.beach.main_season),
+               row->tourism.beach.air_temp,
+               row->tourism.beach.water_temp, "-");
+        break;
+    case SPORTS:
+        printf("%10s│", "sports");
+        printf("%10s│%10s│%10s│%10s│%11s│%15s",
+               "-", "-", "-", "-", "-",
+               get_sports_str(row->tourism.sport_type));
+        break;
+    }
+    printf("│\n");
+}
 
 void print_table(table_t *table, FILE *output)
 {
+    // for (size_t i = 0; i < table->rows_count; i++)
+    // {
+    //     printf("------------------------------\n");
+    //     printf("ID: %zu\n", i);
+    //     print_country(&table->countries[i], output);
+    // }
+    // printf("------------------------------\n");
+    print_header(output);
     for (size_t i = 0; i < table->rows_count; i++)
     {
-        printf("------------------------------\n");
-        printf("ID: %zu\n", i);
-        print_country(&table->countries[i], output);
+        print_row(i, &table->countries[i]);
     }
-    printf("------------------------------\n");
+    print_footer(output);
 }
 
 void print_with_args(table_t *table, continent_enum continent, int max_cost, sports_enum sport_type, FILE *output)
 {
+    print_header(output);
     int is_some_print = 0;
     for (size_t i = 0; i < table->rows_count; i++)
     {
@@ -110,41 +225,75 @@ void print_with_args(table_t *table, continent_enum continent, int max_cost, spo
             && tmp_c.min_rest_cost < max_cost && tmp_c.tourism.sport_type == sport_type)
         {
             is_some_print = 1;
-            printf("------------------------------\n");
-            printf("ID: %zu\n", i);
-            print_country(&table->countries[i], output);
+            // printf("------------------------------\n");
+            // printf("ID: %zu\n", i);
+            // print_country(&table->countries[i], output);
+            print_row(i, &table->countries[i]);
         }
     }
     if (is_some_print)
-        printf("------------------------------\n");
+        print_footer(output);
+        // printf("------------------------------\n");
+}
+void print_table_by_keys(table_t *table, FILE *output)
+{
+    // for (size_t i = 0; i < table->rows_count; i++)
+    // {
+    //     printf("------------------------------\n");
+    //     printf("ID: %zu\n", i);
+    //     print_country(&table->countries[table->keys[i].country_id], output);
+    // }
+    // printf("------------------------------\n");
+    print_header(output);
+    for (size_t i = 0; i < table->rows_count; i++)
+    {
+        print_row(i, &table->countries[table->keys[i].country_id]);
+    }
+    print_footer(output);
 }
 
-void print_key(keys_table_t *key, FILE *output)
+void print_key_header(FILE *f)
 {
-    fprintf(output, "Country id: %zu\n", key->country_id);
-    fprintf(output, "Min rest cost: %d\n", key->min_rest_cost);
+
+    fprintf(f, "┌%s┬%s┬%s┐\n",
+            "────",
+            "────────",
+            MAX_CELL_LINE);
+    fprintf(f, "│%4s│%4s│%*s│\n", "ID", "TABLE ID", MAX_STR_LEN, "Min rest cost");
+    fprintf(f, "├%s┼%s┼%s┤\n",
+            "────",
+            "────────",
+            MAX_CELL_LINE);
+}
+
+void print_key_footer(FILE *f)
+{
+    fprintf(f, "└%s┴%s┴%s┘\n",
+            "────",
+            "────────",
+            MAX_CELL_LINE);
+}
+
+void print_key(size_t id, keys_table_t *key, FILE *output)
+{
+    // fprintf(output, "Country id: %zu\n", key->country_id);
+    // fprintf(output, "Min rest cost: %d\n", key->min_rest_cost);
+    fprintf(output, "│%4zu│%8zu│%*d│\n", id, key->country_id, MAX_STR_LEN, key->min_rest_cost);
 }
 
 void print_keys_table(table_t *table, FILE *output)
 {
+    // for (size_t i = 0; i < table->rows_count; i++)
+    // {
+    //     printf("------------------------------\n");
+    //     printf("ID: %zu\n", i);
+    //     print_key(&table->keys[i], output);
+    // }
+    // printf("------------------------------\n");
+    print_key_header(output);
     for (size_t i = 0; i < table->rows_count; i++)
-    {
-        printf("------------------------------\n");
-        printf("ID: %zu\n", i);
-        print_key(&table->keys[i], output);
-    }
-    printf("------------------------------\n");
-}
-
-void print_table_by_keys(table_t *table, FILE *output)
-{
-    for (size_t i = 0; i < table->rows_count; i++)
-    {
-        printf("------------------------------\n");
-        printf("ID: %zu\n", i);
-        print_country(&table->countries[table->keys[i].country_id], output);
-    }
-    printf("------------------------------\n");
+        print_key(i, &table->keys[i], output);
+    print_key_footer(output);
 }
 
 int cmp_keys_cost(const void *p, const void *q)

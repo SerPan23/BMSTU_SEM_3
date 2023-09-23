@@ -93,6 +93,11 @@ typedef struct
 int read_country(country_t *country, FILE *input);
 void print_country(country_t *country, FILE *output);
 
+char *get_obj_main_type_str(obj_main_type_enum type);
+char *get_season_str(main_season_enum type);
+char *get_sports_str(sports_enum type);
+char *get_str_continent(int continent);
+
 int read_continent(continent_enum *continent, FILE *input);
 int read_sports(sports_enum *sport_type, FILE *input);
 
