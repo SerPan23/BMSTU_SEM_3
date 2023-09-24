@@ -95,3 +95,8 @@ unsigned long long cur_ms_gettimeofday(void)
 
     return (timeval.tv_sec * 1000 + timeval.tv_usec / 1000);
 }
+
+long delta_time(struct timespec mt1, struct timespec mt2)
+{
+    return 1000000000 * (mt2.tv_sec - mt1.tv_sec) + (mt2.tv_nsec - mt1.tv_nsec);
+}

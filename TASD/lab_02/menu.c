@@ -61,7 +61,10 @@ void read_file_item(table_t *table, char *file_path)
         rc = read_table_from_file(table, file);
         if (rc != EXIT_SUCCESS)
         {
-            printf("ERROR: wrong file\n");
+            if (rc == ERROR_ROW_COUNT)
+                printf("ERROR: file is big");
+            else
+                printf("ERROR: wrong file\n");
             continue;
         }
     } while (rc != EXIT_SUCCESS);
@@ -179,25 +182,31 @@ void menu(table_t *table)
             else if (command == 10)
             {
                 double time1, time2;
+                struct timespec begin, end;
                 // table_t tmp_table = *table;
-                unsigned long long begin, end, sum1 = 0, sum2 = 0;
+                // unsigned long long begin, end, sum1 = 0, sum2 = 0;
+                long sum1 = 0, sum2 = 0;
                 for (size_t i = 0; i < ITER_COUNT_TIME; i++)
                 {
                     table_t tmp_table = *table;
-                    begin = cur_ms_gettimeofday();
+                    // begin = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &begin);
                     buble_sort_table(&tmp_table, table->rows_count, sizeof(country_t), cmp_country_cost, 0);
-                    end = cur_ms_gettimeofday();
-                    sum1 += end - begin;
+                    // end = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &end);
+                    sum1 += delta_time(begin, end);
                 }
                 time1 = sum1 / ITER_COUNT_TIME;
 
                 for (size_t i = 0; i < ITER_COUNT_TIME; i++)
                 {
                     table_t tmp_table = *table;
-                    begin = cur_ms_gettimeofday();
+                    // begin = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &begin);
                     buble_sort_table(&tmp_table, table->rows_count, sizeof(keys_table_t), cmp_country_cost, 1);
-                    end = cur_ms_gettimeofday();
-                    sum2 += end - begin;
+                    // end = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &end);
+                    sum2 += delta_time(begin, end);
                 }
                 time2 = sum2 / ITER_COUNT_TIME;
                 // time1 - 100
@@ -205,7 +214,7 @@ void menu(table_t *table)
                 // x = (time2*100)/time1
                 double per1 = 100;
                 double per2 = (time2 * 100.0) / time1;
-                // printf("%lf | %lf | %lf || %llu\n", time2, time1, per2, sum2);
+                // printf("%lf | %lf | %lf || %ld\n", time2, time1, per2, sum2);
 
                 printf("For test made %d sorts\n", ITER_COUNT_TIME);
 
@@ -221,49 +230,58 @@ void menu(table_t *table)
             }
             else if (command == 11)
             {
-                double time1, time2, time3, time4, time5;
-                unsigned long long sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0, sum5 = 0;
+                long time1, time2, time3, time4, time5;
+                long sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0, sum5 = 0;
                 // table_t tmp_table = *table;
                 // table_t tmp_table2 = *table;
-                unsigned long long begin, end;
+                // unsigned long long begin, end;
+                struct timespec begin, end;
 
                 for (size_t i = 0; i < ITER_COUNT_TIME; i++)
                 {
                     table_t tmp_table = *table;
-                    begin = cur_ms_gettimeofday();
+                    // begin = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &begin);
                     buble_sort_table(&tmp_table, table->rows_count, sizeof(country_t), cmp_country_cost, 0);
-                    end = cur_ms_gettimeofday();
-                    sum1 += end - begin;
+                    // end = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &end);
+                    sum1 += delta_time(begin, end);
                 }
                 time1 = sum1 / ITER_COUNT_TIME;
 
                 for (size_t i = 0; i < ITER_COUNT_TIME; i++)
                 {
                     table_t tmp_table = *table;
-                    begin = cur_ms_gettimeofday();
+                    // begin = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &begin);
                     buble_sort_table(&tmp_table, table->rows_count, sizeof(keys_table_t), cmp_country_cost, 1);
-                    end = cur_ms_gettimeofday();
-                    sum2 += end - begin;
+                    // end = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &end);
+                    sum2 += delta_time(begin, end);
                 }
                 time2 = sum2 / ITER_COUNT_TIME;
 
                 for (size_t i = 0; i < ITER_COUNT_TIME; i++)
                 {
                     table_t tmp_table2 = *table;
-                    begin = cur_ms_gettimeofday();
+                    // begin = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &begin);
                     upgraded_buble_sort_table(&tmp_table2, table->rows_count, sizeof(country_t), cmp_country_cost, 0);
-                    end = cur_ms_gettimeofday();
-                    sum3 += end - begin;
+                    // end = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &end);
+                    sum3 += delta_time(begin, end);
                 }
                 time3 = sum3 / ITER_COUNT_TIME;
 
                 for (size_t i = 0; i < ITER_COUNT_TIME; i++)
                 {
                     table_t tmp_table2 = *table;
-                    begin = cur_ms_gettimeofday();
+                    // begin = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &begin);
                     upgraded_buble_sort_table(&tmp_table2, table->rows_count, sizeof(keys_table_t), cmp_country_cost, 1);
-                    end = cur_ms_gettimeofday();
-                    sum4 += end - begin;
+                    // end = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &end);
+                    sum4 += delta_time(begin, end);
                 }
                 time4 = sum4 / ITER_COUNT_TIME;
 
@@ -271,15 +289,17 @@ void menu(table_t *table)
                 for (size_t i = 0; i < ITER_COUNT_TIME; i++)
                 {
                     table_t tmp_table2 = *table;
-                    begin = cur_ms_gettimeofday();
+                    // begin = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &begin);
                     upgraded_buble_sort_table(&tmp_table2, table->rows_count, sizeof(keys_table_t), cmp_country_cost, 1);
                     for(size_t i = 0; i < table->rows_count; i++)
                     {
                         tc = tmp_table2.countries[table->keys[i].country_id];
                         tc.min_rest_cost = tc.min_rest_cost;
                     }
-                    end = cur_ms_gettimeofday();
-                    sum5 += end - begin;
+                    // end = cur_ms_gettimeofday();
+                    clock_gettime(CLOCK_REALTIME, &end);
+                    sum5 += delta_time(begin, end);
                 }
                 time5 = sum5 / ITER_COUNT_TIME;
 
@@ -289,14 +309,14 @@ void menu(table_t *table)
                 char *sep = "├──────────────────────────────┼───────────────┼───────────────┤\n";
                 char *footer = "└──────────────────────────────┴───────────────┴───────────────┘\n";
                 printf("%s", header);
-                printf("│%30s│%15s│%15s│\n", "Operation type", "Time (ms)", "Memory (bytes)");
+                printf("│%30s│%15s│%15s│\n", "Operation type", "Time (ns)", "Memory (bytes)");
                 printf("%s", sep);
-                printf("│%30s│%15lf│%15zu│\n", "sort table by buble", time1, sizeof(country_t) * table->rows_count);
-                printf("│%30s│%15lf│%15zu│\n", "sort keys by buble", time2, sizeof(keys_table_t) * table->rows_count);
-                printf("│%30s│%15lf│%15zu│\n", "sort table by upgrade buble", time3, sizeof(country_t) * table->rows_count);
-                printf("│%30s│%15lf│%15zu│\n", "sort keys by upgrade buble", time4, sizeof(keys_table_t) * table->rows_count);
+                printf("│%30s│%15ld│%15zu│\n", "sort table by buble", time1, sizeof(country_t) * table->rows_count);
+                printf("│%30s│%15ld│%15zu│\n", "sort keys by buble", time2, sizeof(keys_table_t) * table->rows_count);
+                printf("│%30s│%15ld│%15zu│\n", "sort table by upgrade buble", time3, sizeof(country_t) * table->rows_count);
+                printf("│%30s│%15ld│%15zu│\n", "sort keys by upgrade buble", time4, sizeof(keys_table_t) * table->rows_count);
                 printf("%s", sep);
-                printf("│%30s│%15lf│%15zu│\n", "work table by sort keys", time5 + time4, (sizeof(keys_table_t) + sizeof(country_t)) * table->rows_count);
+                printf("│%30s│%15ld│%15zu│\n", "work table by sort keys", time5 + time4, (sizeof(keys_table_t) + sizeof(country_t)) * table->rows_count);
                 printf("%s", footer);
             }
             else if (command == 12)

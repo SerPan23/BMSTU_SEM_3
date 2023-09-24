@@ -13,5 +13,6 @@ int read_string(char *str, size_t *len, size_t max_len, FILE *input);
 void swap(void *a, void *b, size_t size);
 
 unsigned long long cur_ms_gettimeofday(void);
+long delta_time(struct timespec mt1, struct timespec mt2);
 
 #endif
