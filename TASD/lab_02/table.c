@@ -162,7 +162,7 @@ void print_footer(FILE *f)
 
 void print_row(size_t id, country_t *row)
 {
-    printf("│%4zu│%*s│%*s│%*s│%4s│%12d:%2d│%*d│", id,
+    printf("│%4zu│%*s│%*s│%*s│%4s│%12d:%02d│%*d│", id,
            MAX_STR_LEN, row->name,
            MAX_STR_LEN, row->capital,
            MAX_STR_LEN, get_str_continent(row->continent),

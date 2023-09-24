@@ -13,6 +13,7 @@
 #define MAX_STR_LEN 30
 #define MAX_CELL_LINE "──────────────────────────────"
 #define MAX_ROW_COUNT 10000
+#define ITER_COUNT_TIME 100
 
 // useful_funcs
 #define ERROR_EMPTY_INPUT 1

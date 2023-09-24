@@ -133,7 +133,7 @@ int read_country(country_t *country, FILE *input)
     do
     {
         if (input == stdin)
-            printf("Enter name:\n");
+            printf("Enter name (max %d symbols):\n", MAX_STR_LEN);
         rc = read_string(country->name, &country->name_len, MAX_STR_LEN, input);
         if (rc != EXIT_SUCCESS)
         {
@@ -147,7 +147,7 @@ int read_country(country_t *country, FILE *input)
     do
     {
         if (input == stdin)
-            printf("Enter capital:\n");
+            printf("Enter capital (max %d symbols):\n", MAX_STR_LEN);
         rc = read_string(country->capital, &country->capital_len, MAX_STR_LEN, input);   
         if (rc != EXIT_SUCCESS)
         {
@@ -295,7 +295,7 @@ void print_beach(beach_t *beach, FILE *output)
     fprintf(output, "%.2lf\n", beach->air_temp);
 
     if (output == stdout)
-        fprintf(output, "Water temp: ", beach->water_temp);
+        fprintf(output, "Water temp: ");
     fprintf(output, "%.2lf\n", beach->water_temp);
 }
 
