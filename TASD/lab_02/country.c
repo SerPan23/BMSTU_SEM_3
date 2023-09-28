@@ -5,13 +5,13 @@ int read_excursion(excursion_t *excursion, FILE *input)
 {
     if (input == stdin)
         printf("Enter obj count:\n");
-    if (read_int(&excursion->obj_count, MAX_STR_LEN, input) != EXIT_SUCCESS && excursion->obj_count < 0)
+    if (read_int(&excursion->obj_count, MAX_STR_LEN, input) != EXIT_SUCCESS || excursion->obj_count < 0)
         return ERROR_WRONG_OBJ_COUNT;
 
     if (input == stdin)
         printf("Enter obj main type:\n1) Nature\n2) History\n3) Art\n");
     int tmp;
-    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS && (tmp < 1 || tmp > 3))
+    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS || (tmp < 1 || tmp > 3))
         return ERROR_WRONG_OBJ_TYPE;
     excursion->obj_main_type = tmp;
     return EXIT_SUCCESS;
@@ -22,7 +22,7 @@ int read_beach(beach_t *beach, FILE *input)
     int tmp;
     if (input == stdin)
         printf("Enter main season:\n1) Winter\n2) Spring\n3) Summer\n4) Autumn\n");
-    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS && (tmp < 1 || tmp > 4))
+    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS || (tmp < 1 || tmp > 4))
         return ERROR_WRONG_SEASON;
 
     beach->main_season = tmp;
@@ -44,7 +44,7 @@ int read_sports(sports_enum *sport_type, FILE *input)
     int tmp;
     if (input == stdin)
         printf("Choose sport type:\n1) Downhill skiing\n2) Surfing\n3) Climbing\n4) Rafting\n");
-    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS && (tmp < 1 || tmp > 4))
+    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS || (tmp < 1 || tmp > 4))
         return ERROR_WRONG_SPORTS_TYPE;
     *sport_type = tmp;
     return EXIT_SUCCESS;
@@ -74,7 +74,9 @@ int read_continent(continent_enum *continent, FILE *input)
     if (input == stdin)
         printf("Choose continent:\n1) Eurasia\n2) Africa\n3) North America\n"
                "4) South America\n5) Australia\n6) Antarctica\n");
-    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS && (tmp < 0 || tmp > 6))
+    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS)
+        return ERROR_WRONG_CONTINENT;
+    if (tmp < 0 || tmp > 6)
         return ERROR_WRONG_CONTINENT;
 
     *continent = tmp;
@@ -86,7 +88,9 @@ int read_visa(int *is_need_visa, FILE *input)
 {
     if (input == stdin)
         printf("Choose:\n0) Do not need visa\n1) Need visa\n");
-    if (read_int(is_need_visa, MAX_STR_LEN, input) != EXIT_SUCCESS && (*is_need_visa < 0 || *is_need_visa > 1))
+    if (read_int(is_need_visa, MAX_STR_LEN, input) != EXIT_SUCCESS)
+        return ERROR_WRONG_VISA_FLAG;
+    if (*is_need_visa < 0 || *is_need_visa > 1)
         return ERROR_WRONG_VISA_FLAG;
     return EXIT_SUCCESS;
 }
@@ -95,12 +99,12 @@ int read_flight_time(flight_time_t *flight_time, FILE *input)
 {
     if (input == stdin)
         printf("Enter flight hour:\n");
-    if (read_int(&flight_time->hours, MAX_STR_LEN, input) != EXIT_SUCCESS && flight_time->hours < 0)
+    if (read_int(&flight_time->hours, MAX_STR_LEN, input) != EXIT_SUCCESS || flight_time->hours < 0)
         return ERROR_WRONG_HOURS;
 
     if (input == stdin)
         printf("Enter flight minutes:\n");
-    if (read_int(&flight_time->minute, MAX_STR_LEN, input) != EXIT_SUCCESS && (flight_time->minute < 0 || flight_time->minute > 59))
+    if (read_int(&flight_time->minute, MAX_STR_LEN, input) != EXIT_SUCCESS || (flight_time->minute < 0 || flight_time->minute > 59))
         return ERROR_WRONG_MINUTES;
     return EXIT_SUCCESS;
 }
@@ -109,7 +113,7 @@ int read_min_rest_cost(int *min_rest_cost, FILE *input)
 {
     if (input == stdin)
         printf("Enter min cost:\n");
-    if (read_int(min_rest_cost, MAX_STR_LEN, input) != EXIT_SUCCESS && *min_rest_cost < 0)
+    if (read_int(min_rest_cost, MAX_STR_LEN, input) != EXIT_SUCCESS || *min_rest_cost < 0)
         return ERROR_WRONG_COST;
     return EXIT_SUCCESS;
 }
@@ -119,7 +123,10 @@ int read_tourism_type(tourism_enum *tourism_type, FILE *input)
     int tmp;
     if (input == stdin)
         printf("Choose tourism type:\n1) Excursion\n2) Beach\n3) Sport\n");
-    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS && (tmp < 1 || tmp > 3))
+    if (read_int(&tmp, MAX_STR_LEN, input) != EXIT_SUCCESS)
+        return ERROR_WRONG_TOURISM_TYPE;
+
+    if (tmp < 1 || tmp > 3)
         return ERROR_WRONG_TOURISM_TYPE;
 
     *tourism_type = tmp;
@@ -138,7 +145,7 @@ int read_country(country_t *country, FILE *input)
         if (rc != EXIT_SUCCESS)
         {
             if (input == stdin)
-                printf("ERROR: read name (code: %d)", rc);
+                printf("ERROR: read name (code: %d)\n", rc);
             else
                 return rc;
         }
@@ -152,7 +159,7 @@ int read_country(country_t *country, FILE *input)
         if (rc != EXIT_SUCCESS)
         {
             if (input == stdin)
-                printf("ERROR: read capital (code: %d)", rc);
+                printf("ERROR: read capital (code: %d)\n", rc);
             else
                 return rc;
         }
@@ -166,7 +173,7 @@ int read_country(country_t *country, FILE *input)
         if (rc != EXIT_SUCCESS)
         {
             if (input == stdin)
-                printf("ERROR: read continent (code: %d)", rc);
+                printf("ERROR: read continent (code: %d)\n", rc);
             else
                 return rc;
         }
@@ -178,7 +185,7 @@ int read_country(country_t *country, FILE *input)
         if (rc != EXIT_SUCCESS)
         {
             if (input == stdin)
-                printf("ERROR: read is need visa (code: %d)", rc);
+                printf("ERROR: read is need visa (code: %d)\n", rc);
             else
                 return rc;
         }
@@ -190,7 +197,7 @@ int read_country(country_t *country, FILE *input)
         if (rc != EXIT_SUCCESS)
         {
             if (input == stdin)
-                printf("ERROR: read flight time (code: %d)", rc);
+                printf("ERROR: read flight time (code: %d)\n", rc);
             else
                 return rc;
         }
@@ -202,7 +209,7 @@ int read_country(country_t *country, FILE *input)
         if (rc != EXIT_SUCCESS)
         {
             if (input == stdin)
-                printf("ERROR: read min rest cost (code: %d)", rc);
+                printf("ERROR: read min rest cost (code: %d)\n", rc);
             else
                 return rc;
         }
@@ -226,7 +233,7 @@ int read_country(country_t *country, FILE *input)
         if (rc != EXIT_SUCCESS)
         {
             if (input == stdin)
-                printf("ERROR: read tourism (code: %d)", rc);
+                printf("ERROR: read tourism (code: %d)\n", rc);
             else
                 return rc;
         }
@@ -398,6 +405,34 @@ void print_country(country_t *country, FILE *output)
         print_sports(&country->tourism.sport_type, output);
         break;
     }
+}
+
+void print_country_file(country_t *country, FILE *output, int is_last)
+{
+    fprintf(output, "%s\n", country->name);
+    fprintf(output, "%s\n", country->capital);
+    fprintf(output, "%d\n", country->continent);
+    fprintf(output, "%d\n", country->is_need_visa);
+    fprintf(output, "%d\n%d\n", country->flight_time.hours, country->flight_time.minute);
+    fprintf(output, "%d\n", country->min_rest_cost);
+    fprintf(output, "%d\n", country->tourism_type);
+    switch (country->tourism_type)
+    {
+    case EXCURSION:
+        fprintf(output, "%d\n", country->tourism.excursion.obj_count);
+        fprintf(output, "%d", country->tourism.excursion.obj_main_type);
+        break;
+    case BEACH:
+        fprintf(output, "%d\n", country->tourism.beach.main_season);
+        fprintf(output, "%.2lf\n", country->tourism.beach.air_temp);
+        fprintf(output, "%.2lf", country->tourism.beach.water_temp);
+        break;
+    case SPORTS:
+        fprintf(output, "%d", country->tourism.sport_type);
+        break;
+    }
+    if (!is_last)
+        fprintf(output, "\n");
 }
 
 int cmp_country_cost(const void *p, const void *q)

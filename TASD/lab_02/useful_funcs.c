@@ -22,8 +22,14 @@ int read_string(char *str, size_t *len, size_t max_len, FILE *input)
 int is_int(char *s, size_t len)
 {
     for (size_t i = 0; i < len; i++)
+    {
         if (!isdigit(s[i]))
+        {
+            if (i == 0 && (s[i] == '-' || s[i] == '+'))
+                continue;
             return 0;
+        }
+    }
     return 1;
 }
 
@@ -49,7 +55,9 @@ int is_double(char *s, size_t len)
     {
         if (!isdigit(s[i]))
         {
-            if (s[i] == '.' && !is_dot && i > 0)
+            if (i == 0 && (s[i] == '-' || s[i] == '+'))
+                continue;
+            else if (s[i] == '.' && !is_dot && i > 0)
             {
                 is_dot = 1;
                 continue;

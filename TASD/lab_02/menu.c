@@ -22,7 +22,7 @@ void print_menu(void)
     10) Print results of comparing efficiency by work with keys table and table\n\
     11) Print results of using various sorting algorithms\n\
     12) Update data in file\n\
-    0) Quit programm\n");
+    0) Quit program\n");
     printf("------------------\n");
 }
 
@@ -323,7 +323,7 @@ void menu(table_t *table)
             {
                 FILE *file = fopen(file_path, "w");
                 for (size_t i = 0; i < table->rows_count; i++)
-                    print_country(&table->countries[i], file);
+                    print_country_file(&table->countries[i], file, (i == table->rows_count - 1));
                 fclose(file);
                 printf("FILE UPDATED!\n");
             }

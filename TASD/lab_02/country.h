@@ -92,6 +92,7 @@ typedef struct
 
 int read_country(country_t *country, FILE *input);
 void print_country(country_t *country, FILE *output);
+void print_country_file(country_t *country, FILE *output, int is_last);
 
 char *get_obj_main_type_str(obj_main_type_enum type);
 char *get_season_str(main_season_enum type);
