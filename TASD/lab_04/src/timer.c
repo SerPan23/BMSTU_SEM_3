@@ -1,132 +1,84 @@
-// #include "time.h"
+#include "timer.h"
 
-// char *header = "┌───────────┬───────────────┬─────────────────────────┬────────────────────┬─────────────────────────┐\n";
-// char *sep    = "├───────────┼───────────────┼─────────────────────────┼────────────────────┼─────────────────────────┤\n";
-// char *footer = "└───────────┴───────────────┴─────────────────────────┴────────────────────┴─────────────────────────┘\n";
+char stack_array_data[MAX_STACK_LEN];
 
-// void print_table_header(void)
-// {
-//     printf("%s", header);
-//     printf("│%11s│%15s│%25s│%20s│%25s│\n", "Size", "matrix time(ns)", 
-//         "sparse matrix time(ns)", "matrix size(bytes)", "sparse matrix size(bytes)");
-//     printf("%s", sep);
-// }
-// void print_table_footer(void)
-// {
-//     printf("%s", footer);
-// }
+char *header = "┌─────┬────────────────────┬────────────────────┬─────────────────────────┬─────────────────────────┬──────────────────────────────┐\n";
+char *sep    = "├─────┼────────────────────┼────────────────────┼─────────────────────────┼─────────────────────────┼──────────────────────────────┤\n";
+char *footer = "└─────┴────────────────────┴────────────────────┴─────────────────────────┴─────────────────────────┴──────────────────────────────┘\n";
 
-// int print_time(size_t n, size_t nums_count)
-// {
-//     vector_t vec, vec_res;
-//     vec.row_count = n;
-//     vec.len = n;
-//     int rc = vector_alloc(&vec);
-//     if (rc != EXIT_SUCCESS)
-//     {
-//         printf("ERROR: MEM ALLOC");
-//         return rc;
-//     }
-//     vector_random_fill(&vec);
+void print_table_header(void)
+{
+    printf("%s", header);
+    printf("│%5s│%20s│%20s│%25s│%25s│%30s│\n", "Len", "Array stack time(ns)",
+           "List stack time(ns)", "Max arr stack size(bytes)", "Array alloc size(bytes)", "Max list stack size(bytes)");
+    printf("%s", sep);
+}
+void print_table_footer(void)
+{
+    printf("%s", footer);
+}
 
-//     matrix_t mat;
-//     sparse_matrix_t s_mat;
-//     mat.n = n;
-//     mat.m = n;
-//     rc = matrix_alloc(&mat);
-//     if (rc != EXIT_SUCCESS)
-//     {
-//         free_vector(&vec);
-//         printf("ERROR: MEM ALLOC");
-//         return rc;
-//     }
+void print_time(char *str, size_t strlen)
+{
+    stack_list_t stack_list;
+    stack_list.ptr = NULL;
+    stack_list.size = 0;
+    stack_list.free_area_size_alloc = 0;
 
-//     matrix_random_fill(&mat, &nums_count);
-//     s_mat.n = n;
-//     s_mat.m = n;
-//     s_mat.nums_count = nums_count;
-//     matrix_to_sparse_matrix(&mat, &s_mat, &nums_count);
+    stack_array_t stack_array;
+    stack_array.data = stack_array_data;
+    stack_array.size = 0;
 
-//     long time1, time2;
-//     long sum1 = 0, sum2 = 0;
+    long time1, time2;
+    long sum1 = 0, sum2 = 0;
 
-//     struct timespec begin, end;
+    struct timespec begin, end;
 
-//     vec_res.len = n;
-//     vec_res.row_count = n;
-//     rc = vector_alloc(&vec_res);
-//     if (rc != EXIT_SUCCESS)
-//     {
-//         free_vector(&vec);
-//         free_matrix(&mat);
-//         free_sparse_matrix(&s_mat);
-//         printf("ERROR: MEM ALLOC");
-//         return rc;
-//     }
+    size_t max_size_1 = 0;
+    for (size_t i = 0; i < ITER_COUNT_TIME; i++)
+    {
+        clock_gettime(CLOCK_REALTIME, &begin);
+        is_bracket_seq(str, strlen, 0, &stack_list, &stack_array, 1, &max_size_1);
+        clock_gettime(CLOCK_REALTIME, &end);
+        sum1 += delta_time(begin, end);
+    }
+    time1 = sum1 / ITER_COUNT_TIME;
 
-//     for (size_t i = 0; i < ITER_COUNT_TIME; i++)
-//     {
-//         clock_gettime(CLOCK_REALTIME, &begin);
-//         matrix_mul_vec(&mat, &vec, &vec_res);
-//         clock_gettime(CLOCK_REALTIME, &end);
-//         sum1 += delta_time(begin, end);
-//     }
-//     time1 = sum1 / ITER_COUNT_TIME;
+    size_t max_size_2 = 0;
+    for (size_t i = 0; i < ITER_COUNT_TIME; i++)
+    {
+        clock_gettime(CLOCK_REALTIME, &begin);
+        is_bracket_seq(str, strlen, 1, &stack_list, &stack_array, 1, &max_size_2);
+        clock_gettime(CLOCK_REALTIME, &end);
+        sum2 += delta_time(begin, end);
+    }
+    time2 = sum2 / ITER_COUNT_TIME;
 
-//     free_vector(&vec_res);
-//     vec_res.len = n;
-//     vec_res.row_count = n;
-//     rc = vector_alloc(&vec_res);
-//     if (rc != EXIT_SUCCESS)
-//     {
-//         printf("ERROR: MEM ALLOC");
-//         return rc;
-//     }
+    size_t size1 = max_size_1 * sizeof(char);
+    size_t size1_2 = MAX_STACK_LEN * sizeof(char);
+    size_t size2 = max_size_2 * sizeof(list_node_t);
+    printf("│%5zu", strlen);
+    printf("│%20lu│%20lu│", time1, time2);
+    printf("%25zu│%25zu│%30zu│\n", size1, size1_2, size2);
+    stack_list_free(&stack_list);
+}
 
-//     for (size_t i = 0; i < ITER_COUNT_TIME; i++)
-//     {
-//         clock_gettime(CLOCK_REALTIME, &begin);
-//         sparse_matrix_mul_vec(&s_mat, &vec, &vec_res);
-//         clock_gettime(CLOCK_REALTIME, &end);
-//         sum2 += delta_time(begin, end);
-//     }
-//     time2 = sum2 / ITER_COUNT_TIME;
+void print_time_measurements(void)
+{
+    const size_t tests_len = 7;
+    char *tests[tests_len] = {
+        "{[[()]]}",
+        "([{(((())))}])",
+        "{([{(((())))}])[[[[()]]]]}",
+        "[[[[[(((((((({([{(((())))}])[[[[()]]]]}))))))))]]]]]",
+        "[[[[[(((((((({([{(((([[[[[(((((((({([{(((())))}])[[[[()]]]]}))))))))]]]]]))))}])[[[[()]]]]}))))))))]]]]]",
+        "[[[[[(((((((({([{(((([[[[[(((((((({([{(((({([{(((())))}])[[[[()]]]]}))))}])[[[[({([{(((())))}])[[[[()]]]]})]]]]}))))))))]]]]]))))}])[[[[({([{(((())))}])[[[[()]]]]})]]]]}))))))))]]]]]",
+        "[[[[[(((((((({([{(((([[[[[(((((((({([{(((({([{(((([[[[[(((((((({([{(((())))}])[[[[([[[[[(((((((({([{(((())))}])[[[[()]]]]}))))))))]]]]])]]]]}))))))))]]]]]))))}])[[[[()]]]]}))))}])[[[[({([{(((())))}])[[[[()]]]]})]]]]}))))))))]]]]]))))}])[[[[({([{(((())))}])[[[[()]]]]})]]]]}))))))))]]]]]",
+    };
 
-//     size_t size1 = mat.n * mat.m * sizeof(int);
-//     size_t size2 = s_mat.nums_count * sizeof(int) + s_mat.nums_count * sizeof(size_t) + (s_mat.n + 1) * sizeof(size_t);
-//     printf("│%5zux%-5zu", n, n);
-//     printf("│%15lu│%25lu│", time1, time2);
-//     printf("%20zu│%25zu│\n", size1, size2);
-
-//     free_vector(&vec);
-//     free_vector(&vec_res);
-//     free_matrix(&mat);
-//     free_sparse_matrix(&s_mat);
-//     return EXIT_SUCCESS;
-// }
-
-// void print_time_measurements(void)
-// {
-//     size_t sizes[] = {10, 100, 500};
-//     size_t sizes_len = sizeof(sizes) / sizeof(sizes[0]);
-
-//     size_t per_filing[] = {10, 25, 50, 85, 100};
-//     size_t per_filing_len = sizeof(per_filing) / sizeof(per_filing[0]);
-
-//     for (size_t j = 0; j < per_filing_len; j++)
-//     {
-//         printf("%zu%% FILLING\n", per_filing[j]);
-//         printf("\n");
-//         print_table_header();
-//         for (size_t i = 0; i < sizes_len; i++)
-//         {
-//             // n*n - 100
-//             // x - per
-//             // x = n*n*per / 100
-//             size_t nums = (sizes[i] * sizes[i] * per_filing[j]) / 100;
-//             print_time(sizes[i], nums);
-//         }
-//         print_table_footer();
-//         printf("\n");
-//     }
-// }
+    print_table_header();
+    for (size_t i = 0; i < tests_len; i++)
+        print_time(tests[i], strlen(tests[i]));
+    print_table_footer();
+    printf("\n");
+}

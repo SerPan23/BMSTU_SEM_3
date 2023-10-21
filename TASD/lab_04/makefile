@@ -9,8 +9,7 @@ SRCS := $(wildcard *.c)
 
 CFLAGS = -std=c99 -Wall -Werror -Wpedantic -Wextra -Wfloat-equal -Wfloat-conversion -c -O0 -g3 -I$(INCPATH)
 
-# OBJS = $(OUTPATH)main.o $(OUTPATH)menu.o $(OUTPATH)useful_funcs.o $(OUTPATH)timer.o $(OUTPATH)stack_list.o $(OUTPATH)stack_array.o
-OBJS = $(OUTPATH)main.o $(OUTPATH)stack_list.o $(OUTPATH)stack_array.o
+OBJS = $(OUTPATH)main.o $(OUTPATH)useful_funcs.o $(OUTPATH)timer.o $(OUTPATH)stack_list.o $(OUTPATH)stack_array.o $(OUTPATH)sequence_check.o $(OUTPATH)my_menu.o
 
 app.exe : $(OBJS)
 	$(CC) $^ -o $@ -lm

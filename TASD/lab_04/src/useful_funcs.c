@@ -1,11 +1,5 @@
 #include "useful_funcs.h"
 
-int get_random_int(int min, int max)
-{
-    // srand(time(NULL));
-    return min + rand() % (max - min + 1);
-}
-
 long delta_time(struct timespec mt1, struct timespec mt2)
 {
     return 1000000000 * (mt2.tv_sec - mt1.tv_sec) + (mt2.tv_nsec - mt1.tv_nsec);
@@ -13,12 +7,18 @@ long delta_time(struct timespec mt1, struct timespec mt2)
 
 int read_string(char *str, size_t *len, size_t max_len, FILE *input)
 {
-    char tmp[max_len + 2];
+    char tmp[MAX_STR_LEN];
 
-    if (fgets(tmp, max_len + 2, input) == NULL)
+    if (fgets(tmp, MAX_STR_LEN, input) == NULL)
         return ERROR_EMPTY_INPUT;
 
-    tmp[strcspn(tmp, "\n")] = '\0';
+    if (tmp[strlen(tmp) - 1] == '\n')
+        tmp[strlen(tmp) - 1] = '\0';
+    else
+    {
+        clean_stdin(); 
+        return ERROR_STR_LEN;
+    }
 
     if (strlen(tmp) && strlen(tmp) > max_len)
         return ERROR_STR_LEN;
@@ -26,6 +26,7 @@ int read_string(char *str, size_t *len, size_t max_len, FILE *input)
     *len = strlen(tmp);
 
     strncpy(str, tmp, *len + 1);
+    // strcpy(str, tmp);
 
     return EXIT_SUCCESS;
 }
@@ -56,4 +57,10 @@ int read_int(int *num, size_t max_len, FILE *input)
     if (sscanf(tmp, "%d", num) != 1)
         return ERROR_WRONG_NUM;
     return EXIT_SUCCESS;
+}
+
+void clean_stdin(void)
+{
+    char c;
+    while ((c = getchar()) != '\n');
 }
