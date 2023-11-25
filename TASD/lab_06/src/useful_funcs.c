@@ -31,6 +31,26 @@ int read_string(char *str, size_t *len, size_t max_len, FILE *input)
     return EXIT_SUCCESS;
 }
 
+char *del_repeats_from_str(char *str, size_t len)
+{
+    for (size_t i = 0; i < len - 1; i++)
+    {
+        if (!isalnum(str[i]))
+            continue;
+        
+        size_t count = 0;
+        for (size_t j = i + 1; j < len; j++)
+        {
+            if (str[i] == str[j])
+                count++;
+            else
+                str[j - count] = str[j];
+        }
+    }
+
+    return str;
+}
+
 int is_int(char *s, size_t len)
 {
     for (size_t i = 0; i < len; i++)
