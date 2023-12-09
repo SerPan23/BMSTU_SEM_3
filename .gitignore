@@ -12,3 +12,4 @@ C/lab_07_graphics/data/*.txt
 C/lab_07_graphics/preproc_data/*.txt
 C/lab_07_graphics/postproc_data/?/*.txt
 C/lab_07_graphics/postproc_data/?/*.xlsx
+TASD/lab_07/.vscode/settings.json
