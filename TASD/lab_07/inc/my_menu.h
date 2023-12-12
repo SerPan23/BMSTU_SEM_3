@@ -7,7 +7,7 @@
 #include "my_tree.h"
 #include "hash_table.h"
 
-#define MENU_ITEMS_COUNT 6
+#define MENU_ITEMS_COUNT 8
 
 int menu(void);
 

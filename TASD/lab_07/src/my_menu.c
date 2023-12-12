@@ -6,10 +6,12 @@ void print_menu(void)
     printf("Menu:\n\
     1) Add in hash table (opened)\n\
     2) Print hash table (opened)\n\
-    3) Add in hash table (closed)\n\
-    4) Print hash table (closed)\n\
-    5) Process string\n\
-    6) Сomparison of search types\n\
+    3) Restruct hash table (opened)\n\
+    4) Add in hash table (closed)\n\
+    5) Print hash table (closed)\n\
+    6) Restruct hash table (closed)\n\
+    7) Process string\n\
+    8) Сomparison of search types\n\
     0) Quit program\n");
     printf("------------------\n");
 }
@@ -76,8 +78,8 @@ int string_processing(void)
         return rc;
 
     hash_table_t *table;
-    table = table_init(OPENED);
-    // table = table_init(CLOSED);
+    // table = table_init(OPENED);
+    table = table_init(CLOSED);
 
     table_create_from_str(&table, str);
 
@@ -126,9 +128,30 @@ int menu(void)
         }
         else if (command == 2)
         {
+            int tmp = table_is_need_restruct(table_opened);
+            if (tmp)
+                printf("YOUR TABLE NEED RESTRUCT\n");
+
             table_print(table_opened);
         }
         else if (command == 3)
+        {
+            int new_hash = 0;
+            rc = EXIT_FAILURE;
+            while (rc != EXIT_SUCCESS)
+            {
+                printf("Enter new hash:\n");
+                rc = read_int(&new_hash, MAX_STR_LEN, stdin);
+                if (rc != EXIT_SUCCESS || new_hash < 1)
+                {
+                    printf("ERROR: wrong hash\n");
+                    rc = EXIT_FAILURE;
+                }
+            }
+
+            table_restruct(&table_opened, new_hash);
+        }
+        else if (command == 4)
         {
             char tmp;
             int flag = 0;
@@ -142,11 +165,32 @@ int menu(void)
             }
             table_add_with_debug(&table_closed, tmp);
         }
-        else if (command == 4)
+        else if (command == 5)
         {
+            int tmp = table_is_need_restruct(table_closed);
+            if (tmp)
+                printf("YOUR TABLE NEED RESTRUCT\n");
+            
             table_print(table_closed);
         }
-        else if (command == 5)
+        else if (command == 6)
+        {
+            int new_hash = 0;
+            rc = EXIT_FAILURE;
+            while (rc != EXIT_SUCCESS)
+            {
+                printf("Enter new hash:\n");
+                rc = read_int(&new_hash, MAX_STR_LEN, stdin);
+                if (rc != EXIT_SUCCESS || new_hash < 1)
+                {
+                    printf("ERROR: wrong hash\n");
+                    rc = EXIT_FAILURE;
+                }
+            }
+
+            table_restruct(&table_closed, new_hash);
+        }
+        else if (command == 7)
         {
             rc = string_processing();
             if (rc != EXIT_SUCCESS)
@@ -154,7 +198,7 @@ int menu(void)
                 printf("ERROR: Something went wrong (error code: %d)\n", rc);
             }
         }
-        else if (command == 6)
+        else if (command == 8)
         {
             print_time_measurements();
         }

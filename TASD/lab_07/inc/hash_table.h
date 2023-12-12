@@ -6,6 +6,7 @@
 
 #define MAX_ELEMENT_COUNT 256
 #define DEFAULT_HASH_KEY 17
+#define MAX_CMP_COUNT 4
 #define MAX_COLLISION_COUNT 4
 
 #define ERROR_INVALID_VALUE 100
@@ -60,5 +61,8 @@ int table_add_with_debug(hash_table_t **table, char value);
 int table_create_from_str(hash_table_t **table, char *str);
 void table_print(hash_table_t *table);
 int table_search(hash_table_t *table, char value, int *cmp_count);
+int table_restruct(hash_table_t **table, int new_hash);
+int table_restruct_if_need(hash_table_t **table);
+int table_is_need_restruct(hash_table_t *table);
 
 #endif

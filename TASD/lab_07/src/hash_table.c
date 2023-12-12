@@ -179,10 +179,10 @@ data_t *hash_table_closed_search(hash_table_t *hash_table, int (*hash_func)(char
 
     for (int i = p; i < MAX_ELEMENT_COUNT; i++)
     {
+        if (cmp_cout)
+            ++(*cmp_cout);
         if (data_cmp(hash_table->data[i]->value, data) == 0)
         {
-            if (cmp_cout)
-                ++(*cmp_cout);
             if (pos != NULL)
                 *pos = i;
             return hash_table->data[i];
@@ -279,7 +279,7 @@ void hash_table_print(hash_table_t *hash_table, void (*print)(data_t *data, size
 
 void hash_table_restruct_opened(hash_table_t *hash_table, hash_table_t *new_table)
 {
-    for (int pos = 0; pos < hash_table->max_ind; pos++)
+    for (int pos = 0; pos <= hash_table->max_ind; pos++)
     {
         if (hash_table->data[pos] != NULL)
             for (data_t *cur = hash_table->data[pos]; cur != NULL; cur = cur->next)
@@ -292,7 +292,7 @@ void hash_table_restruct_opened(hash_table_t *hash_table, hash_table_t *new_tabl
 
 void hash_table_restruct_closed(hash_table_t *hash_table, hash_table_t *new_table)
 {
-    for (int pos = 0; pos < hash_table->max_ind; pos++)
+    for (int pos = 0; pos <= hash_table->max_ind; pos++)
     {
         data_t *tmp = hash_table->data[pos];
         if (tmp != NULL)
@@ -346,8 +346,8 @@ int table_add(hash_table_t **table, char value)
     if (rc != EXIT_SUCCESS)
         return rc;
 
-    if ((*table)->collision_count >= MAX_COLLISION_COUNT)
-        *table = hash_table_restruct(*table, get_next_prime((*table)->hash_key));
+    // if ((*table)->collision_count >= MAX_COLLISION_COUNT)
+    //     *table = hash_table_restruct(*table, get_next_prime((*table)->hash_key));
 
     return EXIT_SUCCESS;
 }
@@ -358,11 +358,11 @@ int table_add_with_debug(hash_table_t **table, char value)
     if (rc != EXIT_SUCCESS)
         return rc;
 
-    if ((*table)->collision_count >= MAX_COLLISION_COUNT)
-    {
-        *table = hash_table_restruct(*table, get_next_prime((*table)->hash_key));
-        printf("\nTABLE RESTRUCTED (NEW HASH KEY: %d)\n", (*table)->hash_key);
-    }
+    // if ((*table)->collision_count >= MAX_COLLISION_COUNT)
+    // {
+    //     *table = hash_table_restruct(*table, get_next_prime((*table)->hash_key));
+    //     printf("\nTABLE RESTRUCTED (NEW HASH KEY: %d)\n", (*table)->hash_key);
+    // }
 
     return EXIT_SUCCESS;
 }
@@ -404,5 +404,69 @@ void table_print(hash_table_t *table)
 int table_search(hash_table_t *table, char value, int *cmp_count)
 {
     hash_table_search(table, data_hash, value, cmp_count);
+    return EXIT_SUCCESS;
+}
+
+int table_restruct(hash_table_t **table, int new_hash)
+{
+    hash_table_t *tmp = NULL;
+    if (new_hash > 0)
+        tmp = hash_table_restruct(*table, new_hash);
+    else
+        tmp = hash_table_restruct(*table, get_next_prime((*table)->hash_key));
+    
+    if (tmp)
+    {
+        free(*table);
+        *table = tmp;
+        printf("\nTABLE RESTRUCTED (NEW HASH KEY: %d)\n", (*table)->hash_key);
+    }
+    return EXIT_SUCCESS;
+}
+
+int table_is_need_restruct(hash_table_t *table)
+{
+    if (table->type == OPENED)
+    {
+        for (int i = 0; i <= table->max_ind; i++)
+        {
+            int h = 0;
+            if (table->data[i] != NULL)
+                for (data_t *cur = table->data[i]; cur != NULL; cur = cur->next)
+                    h++;
+            if (h > MAX_CMP_COUNT)
+                return 1;
+        }
+    }
+    else
+    {
+        for (int i = 0; i <= table->max_ind; i++)
+        {
+            int h = 0;
+            if (table->data[i] != NULL)
+                hash_table_search(table, data_hash, table->data[i]->value, &h);
+            if (h > MAX_CMP_COUNT)
+                return 1;
+        }
+    }
+
+    return 0;
+}
+
+int table_restruct_if_need(hash_table_t **table)
+{
+    int flag = table_is_need_restruct(*table);
+
+    while (flag)
+    {
+        hash_table_t *tmp = hash_table_restruct(*table, get_next_prime((*table)->hash_key));
+        if (tmp)
+        {
+            free(*table);
+            *table = tmp;
+        }
+        flag = table_is_need_restruct(*table);
+    }
+
     return EXIT_SUCCESS;
 }

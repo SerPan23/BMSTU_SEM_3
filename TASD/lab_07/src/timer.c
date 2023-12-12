@@ -34,10 +34,15 @@ void print_time(char *str, char value)
 
     table_create_from_str(&table_opened, str);
 
+    table_restruct_if_need(&table_opened);
+
     hash_table_t *table_closed;
     table_closed = table_init(CLOSED);
 
     table_create_from_str(&table_closed, str);
+
+    table_restruct_if_need(&table_closed);
+
 
     long time1, time2, time3, time4, time5;
     long sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0, sum5 = 0;
@@ -129,15 +134,17 @@ void print_sizes(char *str)
     table_opened = table_init(OPENED);
 
     table_create_from_str(&table_opened, str);
+    table_restruct_if_need(&table_opened);
 
-    size_t size4 = table_opened->max_ind * sizeof(data_t);
+    size_t size4 = table_opened->size * sizeof(data_t);
 
     hash_table_t *table_closed;
     table_closed = table_init(CLOSED);
 
     table_create_from_str(&table_closed, str);
+    table_restruct_if_need(&table_closed);
 
-    size_t size5 = table_closed->max_ind * sizeof(data_t);
+    size_t size5 = table_closed->size * sizeof(data_t);
 
     printf("│%5zu", strlen(str));
     printf("│%30zu│%30zu│%30zu│%30lu│%30lu│\n", size1, size2, size3, size4, size5);
@@ -164,11 +171,13 @@ void print_cmp_counts(char *str, char value)
     table_opened = table_init(OPENED);
 
     table_create_from_str(&table_opened, str);
+    table_restruct_if_need(&table_opened);
 
     hash_table_t *table_closed;
     table_closed = table_init(CLOSED);
 
     table_create_from_str(&table_closed, str);
+    table_restruct_if_need(&table_closed);
 
     tree_node_t *node = NULL;
     int flag = 0;
@@ -248,7 +257,7 @@ void print_time_measurements(void)
     printf("\n");
 
     print_table_header("Tree size(bytes)", "Balanced tree size(bytes)",
-                       "AVL tree size(bytes)", "Hash table opened size(bytes)", "Hash table closed time(ns)");
+                       "AVL tree size(bytes)", "Hash table opened size(bytes)", "Hash table closed size(bytes)");
     for (size_t i = 0; i < tests_len; i++)
         print_sizes(tests[i]);
     print_table_footer();
