@@ -3,8 +3,7 @@
 
 #include "defines.h"
 #include "useful_funcs.h"
-#include "my_tree.h"
-#include "hash_table.h"
+#include "my_graph.h"
 
 void print_time_measurements(void);
 

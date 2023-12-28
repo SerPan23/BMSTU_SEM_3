@@ -1,15 +1,15 @@
-// #include "my_menu.h"
-
-#include "defines.h"
-#include "useful_funcs.h"
-#include "my_graph.h"
+#include "my_menu.h"
 
 int main(void)
 {
-    graph_t *g = NULL;
+    int rc = menu();
+    return rc;
+
+    /*
+        graph_t *g = NULL;
     graph_init(&g, 5);
 
-    int data[5][5] = 
+    int data[5][5] =
     {
         {0, 1, 1, 0, 0},
         {0, 0, 1, 1, 1},
@@ -42,15 +42,21 @@ int main(void)
         printf("%d) %d\n", i + 1, path->path[i]);
 
 
-    int a = 1;
+    int a = 3;
 
     vector_t *res = get_nodes_len_le_a(path, a);
 
     vector_print(res, ' ', '\n');
 
-    graph_free(&g);
-    vector_free(&res);
+    vector_t *path_to_5 = get_path_to_t(path, 5);
 
-    // int rc = menu();
-    // return rc;
+    vector_print(path_to_5, ' ', '\n');
+
+    graph_free(&g);
+    path_free(&path);
+
+    vector_free(&res);
+    vector_free(&path_to_5);
+
+    */
 }

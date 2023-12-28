@@ -4,12 +4,15 @@ void print_menu(void)
 {
     printf("------------------\n");
     printf("Menu:\n\
-    1) Add in hash table (opened)\n\
-    2) Print hash table (opened)\n\
-    3) Add in hash table (closed)\n\
-    4) Print hash table (closed)\n\
-    5) Process string\n\
-    6) Сomparison of search types\n\
+    1) Init graph\n\
+    2) Add edge\n\
+    3) Show graph\n\
+    4) Is graph connected\n\
+    5) Change start node\n\
+    6) Find nodes, that path len from start node <= a\n\
+    7) Print paths to n node from start node\n\
+    8) Build minimum cost spanning trees\n\
+    9) Time comparation\n\
     0) Quit program\n");
     printf("------------------\n");
 }
@@ -24,80 +27,49 @@ int choose_menu_item(int *command)
     return EXIT_SUCCESS;
 }
 
-int string_processing(void)
+void read_file(graph_t **g)
 {
-    int rc = EXIT_SUCCESS;
-    tree_node_t *tree = NULL;
-
-    // char *str = "B216345576897";
-    char str[MAX_STR_LEN + 1];
-    size_t tmp_l;
-    
+    FILE *file;
+    char tmp[MAX_STR_LEN + 1];
+    size_t tmp_len;
+    int rc;
     do
     {
-        printf("Enter string:\n");
-        rc = read_string(str, &tmp_l, MAX_STR_LEN, stdin);
-        if (rc != EXIT_SUCCESS || tmp_l == 0 || !is_alnum_str(str))
+        printf("Enter path to file with data:\n");
+        rc = read_string(tmp, &tmp_len, MAX_STR_LEN, stdin);
+        if (rc != EXIT_SUCCESS)
         {
-            printf("ERROR: incorrect string\n");
-            rc = EXIT_FAILURE;
+            printf("ERROR: Invalid path\n");
             continue;
         }
-
+        file = fopen(tmp, "r");
+        if (file == NULL)
+        {
+            printf("ERROR: wrong path or file\n");
+            rc = ERROR_WRONG_FILEPATH;
+            continue;
+        }
+        rc = graph_read_from_file(g, file);
+        if (rc != EXIT_SUCCESS)
+        {
+            printf("ERROR: wrong file\n");
+            continue;
+        }
     } while (rc != EXIT_SUCCESS);
-    
-
-    const size_t n = tmp_l;
-
-    tree = tree_create_from_str(str, n);
-
-    rc = open_tree_img("src", tree);
-    if (rc != EXIT_SUCCESS)
-        return rc;
-
-    tree_del_not_unique_nodes(&tree);
-
-    rc = open_tree_img("result", tree);
-    if (rc != EXIT_SUCCESS)
-        return rc;
-
-    tree_print_post_order(tree);
-
-    tree_node_t *balanced_tree =  tree_balance_BST(tree);
-
-    rc = open_tree_img("result_balanced", balanced_tree);
-    if (rc != EXIT_SUCCESS)
-        return rc;
-
-    tree_node_t *avl_tree = AVL_tree_from_tree(tree);
-
-    rc = open_tree_img("result_avl", avl_tree);
-    if (rc != EXIT_SUCCESS)
-        return rc;
-
-    hash_table_t *table;
-    table = table_init(OPENED);
-    // table = table_init(CLOSED);
-
-    table_create_from_str(&table, str);
-
-    table_print(table);
-
-    tree_free(&tree);
-    tree_free(&balanced_tree);
-    table_free(table);
-    return EXIT_SUCCESS;
+    fclose(file);
+    printf("FILE LOADED SUCCESS!\n");
 }
 
 int menu(void)
 {
     int command = -1, rc;
+    int is_graph_init = 0;
+    int is_path_init = 0;
 
-    hash_table_t *table_opened;
-    table_opened = table_init(OPENED);
-
-    hash_table_t *table_closed;
-    table_closed = table_init(CLOSED);
+    graph_t *g = NULL;
+    path_t *path = NULL;
+    int start_node = 1;
+    int a = 3;
 
     while (command != 0)
     {
@@ -112,56 +84,178 @@ int menu(void)
             break;
         else if (command == 1)
         {
-            char tmp;
-            int flag = 0;
-            while (!flag)
+            int flag = 1;
+
+            do
             {
-                tmp = read_symbol("Enter symbol:");
-                if (isalnum(tmp))
-                    flag = 1;
-                else
-                    printf("ERROR: NOT ALNUM\n");
-            }
-            table_add_with_debug(&table_opened, tmp);
-        }
-        else if (command == 2)
-        {
-            table_print(table_opened);
-        }
-        else if (command == 3)
-        {
-            char tmp;
-            int flag = 0;
-            while (!flag)
+                printf("Load from file:\n1) Yes\n0) No\n");
+                rc = read_int(&flag, MAX_STR_LEN, stdin);
+                if (rc != EXIT_SUCCESS || flag < 0 || flag > 1)
+                {
+                    rc = EXIT_FAILURE;
+                    printf("ERROR: Wrong number, it must be from 0 to 1\n");
+                }
+            } while (rc != EXIT_SUCCESS);
+
+            if (flag)
             {
-                tmp = read_symbol("Enter symbol:");
-                if (isalnum(tmp))
-                    flag = 1;
-                else
-                    printf("ERROR: NOT ALNUM\n");
+                read_file(&g);
             }
-            table_add_with_debug(&table_closed, tmp);
-        }
-        else if (command == 4)
-        {
-            table_print(table_closed);
-        }
-        else if (command == 5)
-        {
-            rc = string_processing();
-            if (rc != EXIT_SUCCESS)
+            else
             {
-                printf("ERROR: Something went wrong (error code: %d)\n", rc);
+                int n = 0;
+                do
+                {
+                    printf("Enter nodes count:\n");
+                    rc = read_int(&n, MAX_STR_LEN, stdin);
+                    if (rc != EXIT_SUCCESS || n < 1)
+                    {
+                        rc = EXIT_FAILURE;
+                        printf("ERROR: Wrong count, it must be from 1\n");
+                    }
+                } while (rc != EXIT_SUCCESS);
+                graph_init(&g, n);
             }
+            is_graph_init = 1;
         }
-        else if (command == 6)
+        else if (command == 2 && is_graph_init)
+        {
+            // int data[5][5] =
+            //     {
+            //         {0, 1, 1, 0, 0},
+            //         {0, 0, 1, 1, 1},
+            //         {0, 0, 0, 0, 1},
+            //         {0, 1, 1, 0, 1},
+            //         {0, 1, 1, 0, 0},
+            //     };
+
+            // for (int i = 0; i < 5; i++)
+            //     for (int j = 0; j < 5; j++)
+            //         graph_add_edge(g, i, j, data[i][j]);
+
+            int v, u, len;
+            read_edge(g->n, &v, &u, &len);
+
+            int flag = 1;
+
+            if (is_edge_init(g, v - 1, u - 1))
+            {
+                do
+                {
+                    printf("Replace edge len:\n1) Yes\n0) No\n");
+                    rc = read_int(&flag, MAX_STR_LEN, stdin);
+                    if (rc != EXIT_SUCCESS || flag < 0 || flag > 1)
+                    {
+                        rc = EXIT_FAILURE;
+                        printf("ERROR: Wrong number, it must be from 0 to 1\n");
+                    }
+                } while (rc != EXIT_SUCCESS);
+            }
+
+            if (flag)
+                graph_add_edge(g, v - 1, u - 1, len);
+        }
+        else if (command == 3 && is_graph_init)
+        {
+            graph_open_img("graph", g);
+        }
+        else if (command == 4 && is_graph_init)
+        {
+            if (is_graph_connected(g))
+                printf("Your graph is connected\n");
+            else
+                printf("Your graph is not connected\n");
+        }
+        else if (command == 5 && is_graph_init)
+        {
+            do
+            {
+                printf("Enter start node number (1-%d):\n", g->n);
+                rc = read_int(&start_node, MAX_STR_LEN, stdin);
+                if (rc != EXIT_SUCCESS || start_node < 1 || start_node > g->n)
+                {
+                    rc = EXIT_FAILURE;
+                    printf("ERROR: Wrong start node number, it must be from 1 to %d\n", g->n);
+                }
+            } while (rc != EXIT_SUCCESS);
+        }
+        else if (command == 6 && is_graph_init)
+        {
+            do
+            {
+                printf("Enter max len number (> 0):\n");
+                rc = read_int(&a, MAX_STR_LEN, stdin);
+                if (rc != EXIT_SUCCESS || a < 1)
+                {
+                    rc = EXIT_FAILURE;
+                    printf("ERROR: Wrong number, it must be from 1\n");
+                }
+            } while (rc != EXIT_SUCCESS);
+
+            dijkstra(g, &path, start_node - 1);            
+
+            vector_t *res_nodes = NULL;
+            res_nodes = get_nodes_len_le_a(path, a);
+
+            printf("Nodes that path len from %d <= %d\n", start_node, a);
+            
+            if (res_nodes->size)
+                vector_print(res_nodes, ' ', '\n');
+            else
+                printf("No nodes\n");
+
+            vector_free(&res_nodes);
+            is_path_init = 1;
+        }
+        else if (command == 7 && is_path_init && is_graph_init)
+        {
+            int n = 0;
+
+            do
+            {
+                printf("Enter nodes number (1-%d):\n", g->n);
+                rc = read_int(&n, MAX_STR_LEN, stdin);
+                if (rc != EXIT_SUCCESS || n < 1 || n > g->n)
+                { 
+                    rc = EXIT_FAILURE;
+                    printf("ERROR: Wrong node number, it must be from 1 to %d\n", g->n);
+                }
+            } while (rc != EXIT_SUCCESS);
+
+            vector_t *path_to_n = get_path_to_t(path, n);
+
+            printf("Path from %d to %d\n", start_node, n);
+
+            if (path_to_n && path_to_n->size)
+                vector_print(path_to_n, ' ', '\n');
+            else 
+                printf("No path\n");
+
+            if (path_to_n)
+                vector_free(&path_to_n);
+        }
+        else if (command == 8 && is_graph_init)
+        {
+            if (is_graph_connected(g))
+                minimum_spanning_tree(g);
+            else
+                printf("Your graph is not connected and can't build spanning tree\n");
+        }
+        else if (command == 9)
         {
             print_time_measurements();
         }
+        else
+        {
+            printf("You need init graph before doing something!\n");
+        }
     }
 
-    table_free(table_opened);
-    table_free(table_closed);
+    if (g)
+        graph_free(&g);
+    
+    if (path)
+        path_free(&path);
 
     return EXIT_SUCCESS;
 }

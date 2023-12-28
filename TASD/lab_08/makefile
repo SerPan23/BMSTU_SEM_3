@@ -11,9 +11,8 @@ SRCS := $(wildcard *.c)
 
 CFLAGS = -std=c99 -Wall -Werror -Wpedantic -Wextra -Wfloat-equal -Wfloat-conversion -c -O0 -g3 -I$(INCPATH)
 
-OBJS = $(OUTPATH)main.o $(OUTPATH)useful_funcs.o $(OUTPATH)my_graph.o $(OUTPATH)my_vector.o
-# OBJS = $(OUTPATH)main.o $(OUTPATH)useful_funcs.o $(OUTPATH)my_menu.o $(OUTPATH)timer.o
-# OBJS += $(OUTPATH)
+OBJS = $(OUTPATH)main.o $(OUTPATH)useful_funcs.o $(OUTPATH)my_menu.o $(OUTPATH)timer.o 
+OBJS += $(OUTPATH)my_graph.o $(OUTPATH)my_vector.o 
 
 app.exe : $(OBJS)
 	$(CC) $^ -o $@ -lm
