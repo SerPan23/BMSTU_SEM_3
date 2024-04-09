@@ -1,0 +1,1 @@
+./func_tests/data/negg_04_in_file.txt ./out.txt
