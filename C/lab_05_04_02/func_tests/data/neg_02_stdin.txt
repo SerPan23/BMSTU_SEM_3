@@ -1,4 +1,0 @@
-test
-prod
-1a
-2

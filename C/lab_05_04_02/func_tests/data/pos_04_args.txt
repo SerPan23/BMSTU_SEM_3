@@ -1,2 +1,0 @@
-ab
-../data/pos_04_stdin.txt
